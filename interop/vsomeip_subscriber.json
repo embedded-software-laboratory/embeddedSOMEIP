@@ -1,0 +1,14 @@
+{
+  "unicast": "127.0.0.1",
+  "logging": { "level": "info", "console": "true", "dlt": "false" },
+  "service-discovery": {
+    "enable": "true", "multicast": "224.244.224.245", "port": "30490", "protocol": "udp",
+    "ttl": "5", "cyclic_offer_delay": "1000",
+    "initial_delay_min": "10", "initial_delay_max": "100",
+    "repetitions_base_delay": "20", "repetitions_max": "3"
+  },
+  "npdu-default-timings": {
+    "debounce-time-request": "0", "debounce-time-response": "0",
+    "max-retention-time-request": "0", "max-retention-time-response": "0"
+  }
+}

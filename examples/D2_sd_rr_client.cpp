@@ -1,0 +1,100 @@
+/*
+The MIT License
+Copyright (c) 2026 Lehrstuhl Informatik 11 - RWTH Aachen University
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE
+
+This file is part of embeddedSOMEIP.
+
+Author: i11 - Embedded Software, RWTH Aachen University
+*/
+
+// D2 client, request response over SD
+// Request count comes from argv[1].
+
+#include <atomic>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <thread>
+
+#include "someIp/eSomeIP.hpp"
+#include "someIp/structs/Package.hpp"
+#include "someIp/service_discovery/SdClientService.hpp"
+#include "someIp/service_discovery/SdService.hpp"
+#include "common/constants.hpp"
+
+using namespace someIp;
+
+static std::atomic<int> g_responses{0};
+
+static void on_response(PackageRx &&p) {
+  g_responses.fetch_add(1, std::memory_order_relaxed);
+  std::string bytes(reinterpret_cast<const char *>(p.payload.data()), p.payload.size());
+  printf("[D2] Response: %s\n", bytes.c_str());
+}
+
+int main(int argc, char *argv[]) {
+  int n = (argc > 1) ? std::atoi(argv[1]) : 3;
+  if (n <= 0) n = 1;
+  printf("[D2] SD RR client, discovering service 0x%04X\n", example::SERVICE_ID);
+
+  eSomeIP someIp;
+  IpAddr client_ip = IpAddr::from_string(example::CLIENT_IP);
+  someIp.init(client_ip);
+  someIp.set_transport_mode(TransportKind::UDP);
+  someIp.enable_sd(client_ip);
+  someIp.listen_to_port(example::CLIENT_PORT);
+
+  sd::sd_service_info info{example::SERVICE_ID, example::INSTANCE_ID,
+                           example::MAJOR_VERSION, example::MINOR_VERSION};
+  auto client = std::make_shared<sd::sd_client_service>(info);
+  someIp.register_client_service(client);
+
+  int waited = 0;
+  while (client->get_phase() != sd::sd_client_phase::MAIN &&
+         client->get_phase() != sd::sd_client_phase::STOPPED && waited < 10000) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    waited += 2;
+  }
+  std::shared_ptr<sd::sd_service> found = someIp.find_service(info);
+  if (!found) {
+    printf("[D2] ERROR: service not found via SD\n");
+    return 1;
+  }
+  sd::sd_endpoint_info ep = found->get_endpoint();
+  IpAddr server_ip = ep._ip;
+  uint16_t server_port = ep._port;
+  printf("[D2] Service found at %s:%u\n", server_ip.c_str(), server_port);
+
+  for (int i = 0; i < n; ++i) {
+    std::string payload = "Hello SD-RR " + std::to_string(i + 1);
+    Package req(example::SERVICE_ID, example::RPC_METHOD_ID, payload, server_ip, server_port);
+    req.header._message_type = MessageType::REQUEST;
+    someIp.request_and_response(std::move(req), on_response, TransportKind::UDP);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  }
+  while (g_responses.load(std::memory_order_relaxed) < n) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  }
+
+  Package bye(example::SERVICE_ID, example::SHUTDOWN_METHOD_ID, "bye", server_ip, server_port);
+  bye.header._message_type = MessageType::REQUEST_NO_RETURN;
+  someIp.fire_and_forget(std::move(bye), TransportKind::UDP);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  printf("[D2] Done\n");
+  return 0;
+}
