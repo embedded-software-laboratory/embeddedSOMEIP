@@ -642,9 +642,7 @@ bool ESomeIp::send_package(Package &&ref_p,/*, ip_addr_t &dest_ip, uint16_t dest
     TransportKind realKind = (transportKind == TransportKind::DEFAULT) ? this->m_transportMode : transportKind;
     IpAddr destIp = ref_p.getDestinationIp();
     uint16_t destPort = ref_p.getDestinationPort();
-    printf("----------------------------------------------------------------------------\n");
-    printf(" SENDING PACKAGE of size %d to dest ip (%s:%d)\n", ref_p.header._length +8, destIp.c_str(), destPort);
-    printf("----------------------------------------------------------------------------\n");
+    API_LOGGER::debug("sending package of size %d to %s:%d", ref_p.header._length + 8, destIp.c_str(), destPort);
 
     auto buf = ref_p.serialize();
 
@@ -806,7 +804,7 @@ void ESomeIp::send_notifications(uint16_t serviceId, uint16_t eventId, const uin
     TcpConnection* ptr_tcpConn = nullptr;
 #ifdef SOMEIP_PLATFORM_STM32
     if (transportKind == TransportKind::TCP){
-       ptr_tcpConn = m_ptr_tcpDriver->find_tcp_connection(ipaddr_to_lwip(endpoint._ip), endpoint._port); // TODO store tcp connection in endpoint info to avoid lookup
+       ptr_tcpConn = m_ptr_tcpDriver->find_tcp_connection(ipaddr_to_lwip(endpoint._ip), endpoint._port); // lookup per notification, could be cached in the endpoint info
        if (!ptr_tcpConn){
          API_LOGGER::log("send_notifications: No TCP connection found for subscriber %s:%d", endpoint._ip.c_str(), endpoint._port);
          m_ptr_tcpDriver->print_connections();

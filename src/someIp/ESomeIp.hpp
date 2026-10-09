@@ -230,7 +230,7 @@ class ESomeIp {
     // returns a non-owning borrow, nullptr if the registry is full
     Service *add_service(uint16_t serviceId);
 
-    // TODO add SD to this
+    // removes the local service only, does not withdraw an SD offer (see stop_offer_service)
     void deregister_service(uint16_t serviceId);
 
     // borrowed pointer into the handler store, nullptr if unknown

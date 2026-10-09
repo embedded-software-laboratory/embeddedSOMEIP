@@ -12,6 +12,10 @@ cmake_minimum_required(VERSION 3.15)
 set(BINARY_NAME embeddedSomeIP)
 project(${BINARY_NAME} LANGUAGES C CXX)
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -95,12 +99,4 @@ option(SOMEIP_BUILD_TESTS "Build the unit/integration tests" ON)
 if(SOMEIP_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
-endif()
-
-# -------------------------------------------------------
-# soa_tracer SOME/IP nodes (added last so the someIp target exists)
-# -------------------------------------------------------
-option(SOMEIP_ENABLE_TRACING "Build the soa_tracer SOME/IP nodes (needs the parent's soatracer_tp)" OFF)
-if(SOMEIP_ENABLE_TRACING)
-    add_subdirectory(tracer)
 endif()

@@ -1,6 +1,6 @@
 # Interoperability between embeddedSOMEIP and vsomeip
 
-Two standalone tools that test SOME/IP and SOME/IP-SD on the wire, used to get interopability working between embeddedSOMEIP and COVESA vsomeip. 
+Two standalone tools that test SOME/IP and SOME/IP-SD on the wire, used to get interoperability working between embeddedSOMEIP and COVESA vsomeip. 
 
 Shared IDs (must match across both stacks and `vsomeip.json`):
 `service=0x7777 instance=0x0001 major=1 minor=0 eventgroup=0x0001 event=0x8001`, UDP.
@@ -8,7 +8,7 @@ Shared IDs (must match across both stacks and `vsomeip.json`):
 ## Build
 
 ```sh
-cmake -S interop -B interop/build -DCMAKE_PREFIX_PATH=/home/davidk/embedded/vsomeip-install
+cmake -S interop -B interop/build -DCMAKE_PREFIX_PATH=$VSOMEIP_PREFIX
 cmake --build interop/build -j
 ```
 
@@ -20,7 +20,9 @@ Produces `embeddedsomeip_interop` + `vsomeip_interop` (events) and `embeddedsome
 ## Run
 
 Runs as two Docker containers on an isolated bridge. vsomeip drops SD messages whose
-source IP is its own `unicast`, so both stacks need distinct IPs.
+source IP is its own `unicast`, so both stacks need distinct IPs. Set `VSOMEIP_PREFIX` to the
+vsomeip install prefix; the scripts mount it into the containers. The container image defaults
+to `ubuntu:24.04` and can be changed with `INTEROP_IMAGE`.
 
 ```sh
 # events: embeddedSOMEIP publishes, vsomeip subscribes (or: vsomeip-pub)
@@ -30,17 +32,12 @@ source IP is its own `unicast`, so both stacks need distinct IPs.
 ./interop/run_rr_docker.sh esomeip-server
 ```
 
-`run_interop.sh` runs both on the host, which cross-stack always yields `subscribers=0`
-for the reason above. Single-stack wire debugging only:
-
-```sh
-# needs dumpcap privileges
-CAPTURE=1 LOCAL_IP=192.168.178.133 ./interop/run_interop.sh esomeip-pub
-```
+Running both stacks directly on one host does not work cross-stack: vsomeip then drops the
+SD messages and `subscribers=0` stays at zero, for the reason above. Use the Docker scripts.
 
 Each tool can also be run by hand:
 ```sh
-./interop/build/embeddedsomeip_interop --role pub --local-ip 192.168.178.133 --base-port 40000 --count 20
+./interop/build/embeddedsomeip_interop --role pub --local-ip <host IP> --base-port 40000 --count 20
 VSOMEIP_CONFIGURATION=interop/vsomeip.json ./interop/build/vsomeip_interop --role sub
 ```
 

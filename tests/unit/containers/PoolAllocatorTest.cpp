@@ -58,6 +58,9 @@ TEST(PoolAllocatorTest, AllocateSharedUsesPoolNoHeap) {
 
 // oversize request must assert rather than fall back to the heap
 TEST(PoolAllocatorDeathTest, OversizeAsserts) {
+#ifdef NDEBUG
+  GTEST_SKIP() << "assert() is compiled out in release builds";
+#endif
   FixedBlockPool<128, 8> pool;
   PoolAllocator<Big, 128, 8> a(&pool);
   EXPECT_DEATH({ auto p = std::allocate_shared<Big>(a); (void)p; }, "");

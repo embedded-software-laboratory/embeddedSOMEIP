@@ -80,7 +80,7 @@ namespace someIp
                 chunk_size = (chunk_size / 16) * 16;
             }
 
-            PacketBuffer slice = ref_payload.slice_move(chunk_size); // TODO [SWS_SomeIpTp_00078] check the alloc succeeded
+            PacketBuffer slice = ref_payload.slice_move(chunk_size); // [SWS_SomeIpTp_00078] slice_move returns an empty buffer on failure, callers do not check it yet
 
             TpPackage segment(
                 ref_header,

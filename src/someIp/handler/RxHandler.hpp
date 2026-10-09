@@ -47,9 +47,6 @@ private:
   // returns method or nullptr if not found (pointer into the service's store)
   static Method *find_method(Service *ptr_service, uint16_t methodId);
 
-  // checks method type matches the expected type
-  static ReturnCode validate_message_Type(Method *ptr_method, uint16_t messageType);
-
 public:
   RxHandler(const RxContext *ptr_rxContext, IServiceHandler *ptr_serviceHandler);
   ~RxHandler() = default;

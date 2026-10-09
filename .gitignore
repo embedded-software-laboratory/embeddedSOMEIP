@@ -1,0 +1,17 @@
+# build output
+build/
+cmake-build-*/
+out/
+*.o
+*.a
+
+# test and benchmark artifacts
+tests/embeddedSomeIP_test
+tests/embeddedSomeIP_latency_test
+*.pcap
+*.csv
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store

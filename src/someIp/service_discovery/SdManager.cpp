@@ -51,6 +51,8 @@ namespace someIp
 {
     namespace sd
     {
+        // how long a blocking find waits for an offer before looking again
+        static constexpr uint32_t FIND_WAIT_MS = 100;
 
         SdManager::SdManager(ThreadPool *ptr_thread_pool, IpAddr local_ip, const ServiceVec &ref_services) : m_registry(ref_services), m_subscriptions(m_registry, *this), m_find(*this, m_event_manager), m_offer(m_registry, *this, m_event_manager), m_ptr_thread_pool(ptr_thread_pool), m_local_ip(local_ip)
         {
@@ -597,7 +599,7 @@ const someIp::PoolPtr<SdService> SdManager::find_service(const SdServiceInfo &re
     return sprt_remote_service;
 
   send_find_service(ref_service_info);
-  someIp::os::sleep_ms(100); // TODO: replace magic number
+  someIp::os::sleep_ms(FIND_WAIT_MS);
   return m_registry.find_remote(ref_service_info);
 }
 

@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ---------------------------------------------------------------------------
 set(SOMEIP_BUILD_APPS OFF CACHE BOOL "" FORCE)         # no examples/evaluation
 set(SOMEIP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(SOMEIP_ENABLE_TRACING OFF CACHE BOOL "" FORCE)
 
 # interop/ lives inside the embeddedSOMEIP repo, so the stack is one level up
 set(ESOMEIP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -37,5 +36,5 @@ if(vsomeip3_FOUND)
   target_link_libraries(vsomeip_rr PRIVATE vsomeip3 pthread)
   message(STATUS "vsomeip3 found; building vsomeip_interop + vsomeip_rr")
 else()
-  message(WARNING "vsomeip3 not found (set CMAKE_PREFIX_PATH=/home/davidk/embedded/vsomeip-install); skipping vsomeip_interop")
+  message(WARNING "vsomeip3 not found (set CMAKE_PREFIX_PATH=<vsomeip install prefix>); skipping vsomeip_interop")
 endif()

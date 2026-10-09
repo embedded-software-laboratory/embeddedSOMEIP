@@ -23,6 +23,7 @@ add_executable(${BINARY_NAME_TEST} ${TEST_SOURCES})
 add_test(NAME ${BINARY_NAME_TEST} COMMAND ${BINARY_NAME_TEST})
 target_link_libraries(${BINARY_NAME_TEST} PUBLIC gtest gtest_main gmock gmock_main someIp)
 
-# built on demand, not in ctest. TODO ThreadPoolLatency hangs, no set_owner_api()
-add_executable(${BINARY_NAME_LATENCY_TEST} EXCLUDE_FROM_ALL ${LATENCY_TEST_SOURCES})
+# built on demand, not in ctest
+add_executable(${BINARY_NAME_LATENCY_TEST} EXCLUDE_FROM_ALL ${LATENCY_TEST_SOURCES}
+    mocks/MockNetworkRouter.cpp)
 target_link_libraries(${BINARY_NAME_LATENCY_TEST} PUBLIC gtest gtest_main gmock gmock_main someIp)

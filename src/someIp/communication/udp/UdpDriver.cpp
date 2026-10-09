@@ -113,7 +113,7 @@ static void tcpip_init_init(void *ptr_arg)
   // LWIP_PORT_INIT_IPADDR(&ipaddr);
   LWIP_PORT_INIT_NETMASK(&netmask);
 
-  // TODO: check if (void *)"/tmp/vde.ctl" is needed instead of nullptr (for sd)
+  // open question: sd may need (void *)"/tmp/vde.ctl" instead of nullptr
   netif_add(&netif, &ptr_params->ipaddr, &netmask, &gw, nullptr, tapif_init, tcpip_input); // problems on second call
   UDP_DRIVER_LOGGER::log("Starting lwIP, local interface IP is %s", ip4addr_ntoa(&ptr_params->ipaddr));
   netif_set_default(&netif);

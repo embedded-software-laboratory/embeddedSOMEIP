@@ -9,16 +9,17 @@ NET="${INTEROP_NET:-someip-interop}"
 SUBNET="${INTEROP_SUBNET:-172.30.0.0/16}"
 SERVER_IP="${SERVER_IP:-172.30.0.2}"
 CLIENT_IP="${CLIENT_IP:-172.30.0.3}"
-IMAGE="${INTEROP_IMAGE:-soa-tracer-node:latest}"
+IMAGE="${INTEROP_IMAGE:-ubuntu:24.04}"
 COUNT="${COUNT:-10}"
-EMBEDDED_ROOT="${EMBEDDED_ROOT:-/home/davidk/embedded}"
-VSOMEIP_LIB="${VSOMEIP_LIB:-$EMBEDDED_ROOT/vsomeip-install/lib}"
+# directory holding the vsomeip install, mounted read-only into the containers
+VSOMEIP_PREFIX="${VSOMEIP_PREFIX:?set VSOMEIP_PREFIX to the vsomeip install prefix}"
+VSOMEIP_LIB="${VSOMEIP_LIB:-$VSOMEIP_PREFIX/lib}"
 
 ERR="$BUILD/embeddedsomeip_rr"
 VRR="$BUILD/vsomeip_rr"
 [ -x "$ERR" ] && [ -x "$VRR" ] || { echo "build interop/build first (cmake --build interop/build)" >&2; exit 1; }
 
-RO="-v $EMBEDDED_ROOT:$EMBEDDED_ROOT:ro -v /usr/lib/x86_64-linux-gnu:/hostlib:ro"
+RO="-v $VSOMEIP_PREFIX:$VSOMEIP_PREFIX:ro -v /usr/lib/x86_64-linux-gnu:/hostlib:ro"
 LDP="$VSOMEIP_LIB:/hostlib"
 
 docker network inspect "$NET" >/dev/null 2>&1 || docker network create --subnet "$SUBNET" "$NET" >/dev/null

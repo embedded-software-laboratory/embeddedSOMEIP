@@ -63,13 +63,6 @@ Method *RxHandler::find_method(Service *ptr_service, uint16_t methodId) {
   return ptr_service->find_method_by_id(methodId);
 }
 
-ReturnCode RxHandler::validate_message_Type(Method *ptr_method,
-                                            uint16_t messageType) {
-  (void)ptr_method;
-  (void)messageType;
-  return ReturnCode::E_WRONG_MESSAGE_TYPE; // TODO
-}
-
 PackageRxHandleResult
 RxHandler::handle_rx_package(PackageRx &&ref_package) {
   // result container returned by move, no per-packet heap allocation
@@ -88,7 +81,7 @@ RxHandler::handle_rx_package(PackageRx &&ref_package) {
 
   if (header._message_type == MessageType::ERROR) {
     RX_HANDLER_LOGGER::debug("Message Type of received package was ERROR");
-    // HACK ignore error messages to prevent error loops
+    // errors are never answered with errors, so two peers cannot bounce them forever
     status.code = ReturnCode::E_NOT_OK;
     return status;
   }

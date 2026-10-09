@@ -39,7 +39,7 @@ namespace someIp
     const bool IPV4_ENABLED = true;
 
     const bool TCP_ENABLED = true;
-    // TODO: what is this used for?
+    // enables per-packet LTTng tracepoints in the lwIP drivers (needs the session id from the wire)
     const bool IS_IN_EVALUATION_MODE = true;
 
     // sizing/capacity limits live in config/StackConfig.hpp
@@ -50,7 +50,7 @@ namespace someIp
     const uint8_t PROTOCOL_VERSION = 0x01;
     // must match the offered service major version, RX path validates it
     const uint8_t INTERFACE_VERSION  = 0x01;
-    const auto LOCAL_IP_ADDRESS = "192.168.1.78";
+    const auto LOCAL_IP_ADDRESS = "0.0.0.0"; // unused on POSIX, the local IP is passed to init()
     const uint16_t LOCAL_PORT = 8012;
 
     // dynamic acquisition binds the first free port at or above this

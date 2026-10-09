@@ -56,7 +56,7 @@ Package::Package()
     header._message_id._service_id = serviceId;
     header._message_id._method_id = methodId;
     header._request_id.client_id = someIp::config::CLIENT_ID;
-    header._request_id.session_id = 0; // TODO
+    header._request_id.session_id = 0; // assigned at send time via set_session_id
     header._protocol_version = someIp::config::PROTOCOL_VERSION;
     header._interface_version = someIp::config::INTERFACE_VERSION;
     header._length = calculateLength();
@@ -69,7 +69,7 @@ Package::Package()
     header._message_id._service_id = serviceId;
     header._message_id._method_id = methodId;
     header._request_id.client_id = someIp::config::CLIENT_ID;
-    header._request_id.session_id = 0; // TODO
+    header._request_id.session_id = 0; // assigned at send time via set_session_id
     header._protocol_version = someIp::config::PROTOCOL_VERSION;
     header._interface_version = someIp::config::INTERFACE_VERSION;
     header._length = calculateLength();
@@ -81,7 +81,7 @@ Package::Package()
   {
     header._message_id = messageId;
     header._request_id.client_id = someIp::config::CLIENT_ID;
-    header._request_id.session_id = 0; // TODO
+    header._request_id.session_id = 0; // assigned at send time via set_session_id
     header._protocol_version = someIp::config::PROTOCOL_VERSION;
     header._interface_version = someIp::config::INTERFACE_VERSION;
     header._return_code = ReturnCode::E_OK;
@@ -115,8 +115,6 @@ Package::Package()
     bigEndianHeader._request_id.client_id = someIp::ensure_network_order(header._request_id.client_id);
     bigEndianHeader._request_id.session_id = someIp::ensure_network_order(header._request_id.session_id);
     bigEndianHeader._length = someIp::ensure_network_order(calculateLength());
-    // std::cout << "[SERIALIZE]: message type to serialize is: " << (int) bigEndianHeader.message_type << std::endl;
-    // TODO: add debuger logger
 
     payload.add_in_front(&bigEndianHeader, sizeof(bigEndianHeader));
 

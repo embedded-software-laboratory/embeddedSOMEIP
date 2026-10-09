@@ -41,16 +41,17 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "utils/SuppressOutput.hpp"
 #include "utils/ServiceCreationHelper.hpp"
 #include "utils/Statistics.hpp"
+#include "utils/MockHarness.hpp"
 #include "utils/ProgessBar.hpp"
 
 using namespace someIp;
 
-class ThreadPoolLatency : public ::testing::Test
+class ThreadPoolLatency : public test::MockHarnessTest
 {
 protected:
   void SetUp() override
   {
-    Singleton<ServiceHandler>::reset_instance();
+    test::MockHarnessTest::SetUp();
     // suppress->AllowOutput(); // uncomment to see SOME/IP output
   }
   std::shared_ptr<SuppressOutput> suppress = std::make_shared<SuppressOutput>();
@@ -75,13 +76,16 @@ TEST_F(ThreadPoolLatency, MeasureTheTimeItTakesToInvokeRxHandler)
       wasCalled = true; }));
 
 
+  // the pool's dispatcher resolves services through its owner API
+  someIp::ESomeIp api(test::mock_populator());
+  api.init(test::make_ip("192.168.1.10"));
   auto service = ServiceCreationHelper::create_service_with_one_method(0, 0, [&mockCallback](someIp::PackageRx p)
                                                                        { mockCallback.SafeCall(std::move(p)); });
-  auto serviceHandler = someIp::ServiceHandler::get_instance();
-  serviceHandler->register_service(std::move(service));
-  
+  api.register_service(std::move(service));
+
   someIp::TransportRegistry transports;
   someIp::ThreadPool threadPool = someIp::ThreadPool(transports, nullptr);
+  threadPool.set_owner_api(&api);
   threadPool.start_threads();
 
   suppress->PrintOnce([]
