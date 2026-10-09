@@ -105,12 +105,15 @@ The library is built as the static target `someIp` with `-fno-exceptions`.
 The platform is chosen by the `SOMEIP_PLATFORM_STM32` macro, switched in
 `src/someIp/config/config.hpp`. POSIX is the default and STM32 is opt-in. The macro is a
 compile-time define, not a CMake option; the STM32 build is controlled by the CubeIDE
-project.
+project in [embeddedSOMEIP-STM32](https://github.com/embedded-software-laboratory/embeddedSOMEIP-STM32).
 
 ## Benchmarks
 
 The benchmark clients live in `examples`. Each runs on the host and measures against an
-STM32 server flashed with a matching `SOMEIP_TESTCASE`.
+STM32 server flashed with a matching `SOMEIP_TESTCASE`. The firmware is the STM32CubeIDE
+project [embeddedSOMEIP-STM32](https://github.com/embedded-software-laboratory/embeddedSOMEIP-STM32) for a NUCLEO-H743ZI. It includes this repository as a
+git submodule, builds the library with `SOMEIP_PLATFORM_STM32` set, and selects the scenario
+at compile time.
 
 | Client | STM32 image | Measures |
 |---|---|---|
